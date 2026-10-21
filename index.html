@@ -6,20 +6,20 @@
   <title>Diseña tu Franela - Abrazo en Familia</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Comic Neue -->
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
   <!-- html2canvas -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            brandBlue: '#0047AB',    // Azul Rey
-            brandYellow: '#FFD700',  // Amarillo
-            brandYellowDark: '#E6C200',
-            brandBlueDark: '#002E70'
+            brandBlue: '#0047AB',
+            brandBlueDark: '#002E70',
+            brandYellow: '#FFD700',
+            brandYellowDark: '#E6C200'
           },
           fontFamily: {
             comic: ['"Comic Neue"', 'cursive', 'sans-serif']
@@ -31,33 +31,45 @@
   <style>
     body {
       font-family: 'Comic Neue', cursive, sans-serif;
-      background-color: #f4f7fe;
+      background-color: #0047AB;
     }
-    /* Lienzo y escala proporcional */
-    .shirt-viewport {
+    .wizard-step {
+      display: none;
+    }
+    .wizard-step.active {
+      display: block;
+    }
+    .shirt-container {
       position: relative;
-      background: white;
-      border: 3px dashed #0047AB;
+      margin: 0 auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
       border-radius: 1rem;
       overflow: hidden;
-      margin: 0 auto;
-      box-shadow: 0 10px 25px -5px rgba(0, 71, 171, 0.15);
+      background-color: white;
       user-select: none;
     }
-    /* Estilos de elementos arrastrables */
+    .shirt-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      display: block;
+    }
     .draggable-item {
       position: absolute;
       cursor: move;
       touch-action: none;
-      border: 2px dashed transparent;
-      transition: border-color 0.2s;
+      border: 2px dashed #0047AB;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-sizing: border-box;
+      background: rgba(255, 255, 255, 0.05);
     }
     .draggable-item:hover, .draggable-item.active {
       border-color: #FFD700;
-      box-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+      box-shadow: 0 0 10px #FFD700;
     }
     .draggable-item img {
       width: 100%;
@@ -67,152 +79,136 @@
     }
     .delete-btn {
       position: absolute;
-      top: -10px;
-      right: -10px;
+      top: -12px;
+      right: -12px;
       background: #ef4444;
       color: white;
       border-radius: 50%;
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 14px;
       font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 20;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     }
   </style>
 </head>
-<body class="min-h-screen text-slate-800 pb-12">
+<body class="min-h-screen text-slate-800 flex flex-col justify-between p-2 md:p-6">
 
-  <!-- CABECERA INSTITUCIONAL CON LOGO -->
-  <header class="bg-brandBlue text-white shadow-lg border-b-4 border-brandYellow py-4 px-6 mb-6">
-    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <!-- Ruta exacta del logo cargada en GitHub -->
-        <img src="assets/img/logo/logo.png" alt="Logo Institución" class="h-16 w-auto object-contain bg-white p-1 rounded-lg shadow-md" onerror="this.style.display='none'">
-        <div>
-          <h1 class="text-3xl font-bold tracking-wide text-brandYellow drop-shadow-md">Abrazo en Familia</h1>
-          <p class="text-sm font-semibold text-blue-100">Diseña tu franela escolar con tu propio arte 🎨✨</p>
-        </div>
+  <!-- ENCABEZADO CON LOGO INSTITUCIONAL -->
+  <header class="bg-white rounded-2xl p-4 shadow-lg border-b-4 border-brandYellow max-w-5xl mx-auto w-full flex items-center justify-between gap-4 mb-4">
+    <div class="flex items-center gap-3">
+      <img src="assets/img/logo/logo.png" alt="Logo Institución" class="h-14 w-auto object-contain" onerror="this.style.display='none'">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold text-brandBlue">Abrazo en Familia</h1>
+        <p class="text-xs md:text-sm font-semibold text-slate-500">Diseña tu Franela con tu Propio Arte 🎨</p>
       </div>
-      <button onclick="openTutorial()" class="bg-brandYellow hover:bg-brandYellowDark text-brandBlue font-bold py-2 px-5 rounded-full shadow-md transition-all transform hover:scale-105 flex items-center gap-2">
-        <span>❓</span> ¿Cómo se usa?
-      </button>
+    </div>
+    <!-- Indicador de Paso -->
+    <div id="stepIndicator" class="bg-brandBlue text-brandYellow font-bold px-4 py-2 rounded-xl text-sm md:text-base border-2 border-brandYellow shadow">
+      Paso 1 de 4
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4">
+  <!-- CONTENEDOR PRINCIPAL PANTALLA COMPLETA -->
+  <main class="max-w-5xl mx-auto w-full bg-white rounded-3xl p-6 shadow-2xl border-4 border-brandYellow flex-grow flex flex-col justify-between">
 
-    <!-- PASO 1: SELECCIONA TU GRADO Y MASCOTA -->
-    <section class="bg-white rounded-2xl p-6 shadow-md border-2 border-brandBlue/20 mb-8">
-      <div class="flex items-center gap-3 mb-4">
-        <span class="bg-brandBlue text-white font-bold text-lg w-8 h-8 rounded-full flex items-center justify-center">1</span>
-        <h2 class="text-2xl font-bold text-brandBlue">Selecciona tu Grado y pon tu Nombre</h2>
-      </div>
+    <!-- PASO 1: MASCOTA Y NOMBRE -->
+    <div id="step1" class="wizard-step active">
+      <h2 class="text-2xl md:text-3xl font-bold text-brandBlue mb-2">¡Hola! Selecciona tu Grado e ingresa tu Nombre 👧👦</h2>
+      <p class="text-slate-600 mb-6 font-bold">Haz clic sobre la mascota correspondiente a tu grado:</p>
 
       <div class="mb-6">
-        <label class="block text-slate-700 font-bold mb-2">Escribe tu Nombre y Apellido:</label>
-        <input type="text" id="studentName" placeholder="Ej: Sofía Martínez" class="w-full md:w-1/2 p-3 border-2 border-slate-300 rounded-xl focus:border-brandBlue focus:outline-none text-lg">
+        <label class="block text-slate-700 font-bold mb-2 text-lg">Tu Nombre y Apellido:</label>
+        <input type="text" id="studentName" placeholder="Escribe tu nombre aquí..." class="w-full md:w-2/3 p-4 border-2 border-brandBlue/30 rounded-2xl text-xl focus:border-brandBlue focus:outline-none shadow-inner">
       </div>
 
-      <p class="font-bold text-slate-700 mb-3">Haz clic sobre la mascota de tu grado:</p>
-      
-      <!-- GRID DE MASCOTAS -->
-      <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-9 gap-3 text-center">
-        <!-- Preescolar -->
-        <div onclick="selectGrade('I Grupo', 'assets/img/mascotas/I_grupo.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
+      <!-- GRID DE MASCOTAS DESDE CARPETA GITHUB -->
+      <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-9 gap-3 text-center mb-6">
+        <div onclick="selectGrade('I Grupo', 'assets/img/mascotas/I_grupo.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-2xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
           <img src="assets/img/mascotas/I_grupo.png" alt="I Grupo" class="h-16 mx-auto object-contain mb-1" onerror="this.src='https://via.placeholder.com/80?text=I+Grupo'">
-          <span class="text-xs font-bold block text-brandBlue">I Grupo</span>
+          <span class="text-xs font-bold text-brandBlue block">I Grupo</span>
         </div>
-        <div onclick="selectGrade('II Grupo', 'assets/img/mascotas/II_grupo.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
+        <div onclick="selectGrade('II Grupo', 'assets/img/mascotas/II_grupo.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-2xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
           <img src="assets/img/mascotas/II_grupo.png" alt="II Grupo" class="h-16 mx-auto object-contain mb-1" onerror="this.src='https://via.placeholder.com/80?text=II+Grupo'">
-          <span class="text-xs font-bold block text-brandBlue">II Grupo</span>
+          <span class="text-xs font-bold text-brandBlue block">II Grupo</span>
         </div>
-        <div onclick="selectGrade('III Grupo', 'assets/img/mascotas/III_grupo.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
+        <div onclick="selectGrade('III Grupo', 'assets/img/mascotas/III_grupo.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-2xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
           <img src="assets/img/mascotas/III_grupo.png" alt="III Grupo" class="h-16 mx-auto object-contain mb-1" onerror="this.src='https://via.placeholder.com/80?text=III+Grupo'">
-          <span class="text-xs font-bold block text-brandBlue">III Grupo</span>
+          <span class="text-xs font-bold text-brandBlue block">III Grupo</span>
         </div>
-        <!-- Primaria -->
-        <div onclick="selectGrade('1er Grado', 'assets/img/mascotas/1er_grado.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
+        <div onclick="selectGrade('1er Grado', 'assets/img/mascotas/1er_grado.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-2xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
           <img src="assets/img/mascotas/1er_grado.png" alt="1er Grado" class="h-16 mx-auto object-contain mb-1" onerror="this.src='https://via.placeholder.com/80?text=1er+Grado'">
-          <span class="text-xs font-bold block text-brandBlue">1er Grado</span>
+          <span class="text-xs font-bold text-brandBlue block">1er Grado</span>
         </div>
-        <div onclick="selectGrade('2do Grado', 'assets/img/mascotas/2do_grado.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
+        <div onclick="selectGrade('2do Grado', 'assets/img/mascotas/2do_grado.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-2xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
           <img src="assets/img/mascotas/2do_grado.png" alt="2do Grado" class="h-16 mx-auto object-contain mb-1" onerror="this.src='https://via.placeholder.com/80?text=2do+Grado'">
-          <span class="text-xs font-bold block text-brandBlue">2do Grado</span>
+          <span class="text-xs font-bold text-brandBlue block">2do Grado</span>
         </div>
-        <div onclick="selectGrade('3er Grado', 'assets/img/mascotas/3er_grado.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
+        <div onclick="selectGrade('3er Grado', 'assets/img/mascotas/3er_grado.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-2xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
           <img src="assets/img/mascotas/3er_grado.png" alt="3er Grado" class="h-16 mx-auto object-contain mb-1" onerror="this.src='https://via.placeholder.com/80?text=3er+Grado'">
-          <span class="text-xs font-bold block text-brandBlue">3er Grado</span>
+          <span class="text-xs font-bold text-brandBlue block">3er Grado</span>
         </div>
-        <div onclick="selectGrade('4to Grado', 'assets/img/mascotas/4to_grado.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
+        <div onclick="selectGrade('4to Grado', 'assets/img/mascotas/4to_grado.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-2xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
           <img src="assets/img/mascotas/4to_grado.png" alt="4to Grado" class="h-16 mx-auto object-contain mb-1" onerror="this.src='https://via.placeholder.com/80?text=4to+Grado'">
-          <span class="text-xs font-bold block text-brandBlue">4to Grado</span>
+          <span class="text-xs font-bold text-brandBlue block">4to Grado</span>
         </div>
-        <div onclick="selectGrade('5to Grado', 'assets/img/mascotas/5to_grado.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
+        <div onclick="selectGrade('5to Grado', 'assets/img/mascotas/5to_grado.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-2xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
           <img src="assets/img/mascotas/5to_grado.png" alt="5to Grado" class="h-16 mx-auto object-contain mb-1" onerror="this.src='https://via.placeholder.com/80?text=5to+Grado'">
-          <span class="text-xs font-bold block text-brandBlue">5to Grado</span>
+          <span class="text-xs font-bold text-brandBlue block">5to Grado</span>
         </div>
-        <div onclick="selectGrade('6to Grado', 'assets/img/mascotas/6to_grado.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
+        <div onclick="selectGrade('6to Grado', 'assets/img/mascotas/6to_grado.png')" class="grade-card cursor-pointer p-3 border-2 border-slate-200 rounded-2xl hover:border-brandYellow hover:bg-yellow-50 transition-all">
           <img src="assets/img/mascotas/6to_grado.png" alt="6to Grado" class="h-16 mx-auto object-contain mb-1" onerror="this.src='https://via.placeholder.com/80?text=6to+Grado'">
-          <span class="text-xs font-bold block text-brandBlue">6to Grado</span>
+          <span class="text-xs font-bold text-brandBlue block">6to Grado</span>
         </div>
       </div>
-      <div id="selectedGradeBadge" class="mt-4 p-3 bg-blue-50 text-brandBlue font-bold rounded-xl border border-brandBlue/30 hidden">
-        Grado Seleccionado: <span id="gradeNameText" class="text-brandBlueDark underline"></span>
-      </div>
-    </section>
+    </div>
 
-    <!-- PASO 2: TIPO DE PRENDA Y TALLAS (PROPORCIONALES) -->
-    <section class="bg-white rounded-2xl p-6 shadow-md border-2 border-brandBlue/20 mb-8">
-      <div class="flex items-center gap-3 mb-4">
-        <span class="bg-brandBlue text-white font-bold text-lg w-8 h-8 rounded-full flex items-center justify-center">2</span>
-        <h2 class="text-2xl font-bold text-brandBlue">Elige la Prenda y Talla Exacta</h2>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- PASO 2: SELECCIÓN DE PRENDA Y TALLA -->
+    <div id="step2" class="wizard-step">
+      <h2 class="text-2xl md:text-3xl font-bold text-brandBlue mb-4">Selecciona el tipo de Franela y la Talla Exacta 👕</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div>
-          <label class="block text-slate-700 font-bold mb-2">Categoría de Prenda:</label>
-          <select id="categorySelect" onchange="updateSizes()" class="w-full p-3 border-2 border-slate-300 rounded-xl focus:border-brandBlue focus:outline-none text-lg">
-            <option value="nino">Franela de Niño</option>
+          <label class="block text-slate-700 font-bold mb-2 text-lg">Categoría:</label>
+          <select id="categorySelect" onchange="updateSizes()" class="w-full p-4 border-2 border-brandBlue/30 rounded-2xl text-lg font-bold">
+            <option value="nino">Franela Infantil (Niños)</option>
             <option value="dama">Franela de Dama</option>
             <option value="caballero">Franela de Caballero</option>
           </select>
         </div>
         <div>
-          <label class="block text-slate-700 font-bold mb-2">Talla:</label>
-          <select id="sizeSelect" onchange="recalculateViewport()" class="w-full p-3 border-2 border-slate-300 rounded-xl focus:border-brandBlue focus:outline-none text-lg">
+          <label class="block text-slate-700 font-bold mb-2 text-lg">Talla Exacta:</label>
+          <select id="sizeSelect" onchange="recalculateViewport()" class="w-full p-4 border-2 border-brandBlue/30 rounded-2xl text-lg font-bold">
             <!-- Cargado dinámicamente -->
           </select>
         </div>
       </div>
-      <div class="mt-3 text-sm text-slate-500 font-semibold" id="sizeDimensionsLabel">
-        Medidas reales: Ancho -- cm × Largo -- cm
+      <div id="sizeDimensionsLabel" class="p-4 bg-blue-50 text-brandBlue font-bold rounded-2xl text-center text-lg border border-brandBlue/20">
+        Medidas Reales: Ancho -- cm × Largo -- cm
       </div>
-    </section>
+    </div>
 
-    <!-- PASO 3: ARCHIVOS Y DIBUJOS -->
-    <section class="bg-white rounded-2xl p-6 shadow-md border-2 border-brandBlue/20 mb-8">
-      <div class="flex items-center gap-3 mb-4">
-        <span class="bg-brandBlue text-white font-bold text-lg w-8 h-8 rounded-full flex items-center justify-center">3</span>
-        <h2 class="text-2xl font-bold text-brandBlue">Sube tus Dibujos y tu Firma</h2>
-      </div>
-
+    <!-- PASO 3: ARCHIVOS CON FILTRO QUITA-FONDO REAL -->
+    <div id="step3" class="wizard-step">
+      <h2 class="text-2xl md:text-3xl font-bold text-brandBlue mb-4">Sube la foto de tu Firma y tus Dibujos 📷</h2>
+      
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <!-- Cargar Firma -->
-        <div class="p-4 border-2 border-dashed border-brandBlue rounded-xl bg-blue-50/50">
-          <h3 class="font-bold text-brandBlue mb-2">🖋️ 1. Tu Firma (Máximo 20 × 10 cm)</h3>
-          <p class="text-xs text-slate-600 mb-3">Toma foto a la firma del niño en hoja blanca.</p>
+        <div class="p-6 border-3 border-dashed border-brandBlue rounded-2xl bg-blue-50/60 text-center">
+          <h3 class="font-bold text-xl text-brandBlue mb-2">🖋️ Firma del Niño (Máx 20 × 10 cm)</h3>
+          <p class="text-xs text-slate-500 mb-4">Sube la foto de la firma hecha en hoja blanca.</p>
           <input type="file" id="signatureInput" accept="image/*" class="w-full text-sm">
         </div>
 
         <!-- Cargar Dibujos -->
-        <div class="p-4 border-2 border-dashed border-brandYellowDark rounded-xl bg-yellow-50/50">
-          <h3 class="font-bold text-slate-800 mb-2">🎨 2. Tus Dibujos</h3>
-          <p class="text-xs text-slate-600 mb-2">Elige la combinación de tamaños que hiciste:</p>
-          <select id="comboSelect" class="w-full p-2 mb-3 border border-slate-300 rounded-lg text-sm">
+        <div class="p-6 border-3 border-dashed border-brandYellowDark rounded-2xl bg-yellow-50/60 text-center">
+          <h3 class="font-bold text-xl text-slate-800 mb-2">🎨 Dibujos</h3>
+          <p class="text-xs text-slate-500 mb-2">Selecciona la combinación de tamaños que dibujaste:</p>
+          <select id="comboSelect" class="w-full p-3 mb-4 border border-slate-300 rounded-xl text-sm font-bold">
             <option value="A">Combo A: 1 de 15x15cm, 1 de 10x10cm y 1 de 5x5cm</option>
             <option value="B">Combo B: 3 Dibujos de 10x10cm</option>
             <option value="C">Combo C: 6 Dibujos de 5x5cm</option>
@@ -221,72 +217,57 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
-        <input type="checkbox" id="removeBgCheck" checked class="w-5 h-5 accent-brandBlue">
-        <label for="removeBgCheck" class="text-sm font-bold text-slate-700">Remover fondo blanco automáticamente (dejar solo los trazos del marcador)</label>
+      <div class="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+        <input type="checkbox" id="removeBgCheck" checked class="w-6 h-6 accent-brandBlue cursor-pointer">
+        <label for="removeBgCheck" class="text-base font-bold text-slate-700 cursor-pointer">
+          ✨ Remover automático el fondo blanco del papel (dejar únicamente los trazos)
+        </label>
       </div>
-    </section>
+    </div>
 
-    <!-- PASO 4: LIENZO DE DISEÑO Y UBICACIÓN -->
-    <section class="bg-white rounded-2xl p-6 shadow-md border-2 border-brandBlue/20 mb-8">
-      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <div class="flex items-center gap-3">
-          <span class="bg-brandBlue text-white font-bold text-lg w-8 h-8 rounded-full flex items-center justify-center">4</span>
-          <h2 class="text-2xl font-bold text-brandBlue">Ubica los elementos sobre la Franela</h2>
-        </div>
-        <!-- Vistas de la franela -->
+    <!-- PASO 4: LIENZO Y UBICACIÓN SOBRE LA CAMISETA REAL -->
+    <div id="step4" class="wizard-step">
+      <div class="flex flex-col md:flex-row items-center justify-between mb-4 gap-2">
+        <h2 class="text-2xl font-bold text-brandBlue">Arrastra tus dibujos sobre la Franela 👕</h2>
+        <!-- Modos de Vista -->
         <div class="flex gap-2">
-          <button onclick="setView('front')" class="view-btn bg-brandBlue text-white font-bold px-4 py-2 rounded-lg text-sm">Frente</button>
-          <button onclick="setView('back')" class="view-btn bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-lg text-sm">Espalda</button>
-          <button onclick="setView('sleeveL')" class="view-btn bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-lg text-sm">Manga Izq.</button>
-          <button onclick="setView('sleeveR')" class="view-btn bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-lg text-sm">Manga Der.</button>
+          <button onclick="setView('front')" class="view-btn bg-brandBlue text-white font-bold px-4 py-2 rounded-xl text-sm shadow">Frente</button>
+          <button onclick="setView('back')" class="view-btn bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-sm">Espalda</button>
+          <button onclick="setView('sleeveL')" class="view-btn bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-sm">Manga Izq.</button>
+          <button onclick="setView('sleeveR')" class="view-btn bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl text-sm">Manga Der.</button>
         </div>
       </div>
 
-      <p class="text-sm text-slate-500 mb-4">Mueve y arrastra los elementos libremente dentro del área marcada.</p>
-
-      <!-- VIEWPORT DE LA FRANELA -->
-      <div class="flex justify-center items-center p-4 bg-slate-100 rounded-2xl overflow-x-auto">
-        <div id="shirtViewport" class="shirt-viewport">
-          <!-- Silueta SVG de Franela -->
-          <svg id="shirtSvg" class="w-full h-full text-slate-300" viewBox="0 0 100 120" preserveAspectRatio="none">
-            <path d="M 30,10 L 40,18 L 60,18 L 70,10 L 95,28 L 80,48 L 72,40 L 72,110 L 28,110 L 28,40 L 20,48 L 5,28 Z" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
-          </svg>
-          <!-- Contenedor dinámico de elementos arrastrables -->
+      <!-- VIEWPORT DE LA CAMISETA REAL -->
+      <div class="flex justify-center items-center p-4 bg-slate-100 rounded-3xl overflow-x-auto min-h-[460px]">
+        <div id="shirtViewport" class="shirt-container">
+          <!-- Imagen Real de Camiseta cargada en GitHub -->
+          <img id="shirtImage" src="assets/img/Franelas/infantil.jpg" alt="Franela Real" class="shirt-img" onerror="this.src='https://via.placeholder.com/400x500?text=Franela+Real'">
+          <!-- Capa interactiva de elementos arrastrables -->
           <div id="canvasItems" class="absolute inset-0"></div>
         </div>
       </div>
-    </section>
-
-    <!-- BOTÓN FINAL DE DESCARGA -->
-    <div class="text-center mt-8">
-      <button onclick="generateFinalDesign()" class="bg-brandYellow hover:bg-brandYellowDark text-brandBlue text-2xl font-bold py-4 px-10 rounded-full shadow-xl transition-all transform hover:scale-105 border-4 border-brandBlue">
-        💾 ¡Guardar y Descargar mi Diseño! 🎓
-      </button>
     </div>
+
+    <!-- BARRA DE NAVEGACIÓN INFERIOR (PASO A PASO) -->
+    <footer class="flex justify-between items-center mt-6 pt-4 border-t-2 border-slate-100">
+      <button id="prevBtn" onclick="changeStep(-1)" class="bg-slate-300 text-slate-700 font-bold py-3 px-8 rounded-2xl text-lg hidden hover:bg-slate-400">
+        ⬅️ Atrás
+      </button>
+      <div class="flex-grow"></div>
+      <button id="nextBtn" onclick="changeStep(1)" class="bg-brandYellow hover:bg-brandYellowDark text-brandBlue font-bold py-3 px-10 rounded-2xl text-xl shadow-lg border-2 border-brandBlue">
+        Siguiente ➡️
+      </button>
+      <button id="finishBtn" onclick="generateFinalDesign()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-10 rounded-2xl text-xl shadow-xl hidden">
+        💾 Descargar Diseño Final 🎓
+      </button>
+    </footer>
 
   </main>
 
-  <!-- MODAL TUTORIAL -->
-  <div id="tutorialModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-6 border-4 border-brandYellow shadow-2xl">
-      <h3 class="text-2xl font-bold text-brandBlue mb-3">¡Bienvenido, Pequeño Artista! 🎨✨</h3>
-      <ol class="list-decimal list-inside space-y-2 text-slate-700 font-semibold mb-6">
-        <li>Selecciona tu mascota e ingresa tu nombre.</li>
-        <li>Selecciona la talla de tu franela.</li>
-        <li>Pídele ayuda a mami o papi para subir la foto de tus dibujos y tu firma.</li>
-        <li>Arrastra las imágenes para ubicarlas en el lugar de la franela que más te guste.</li>
-        <li>¡Haz clic en Guardar y listo!</li>
-      </ol>
-      <button onclick="closeTutorial()" class="w-full bg-brandBlue text-white font-bold py-3 rounded-xl text-lg hover:bg-brandBlueDark">
-        ¡Entendido, vamos a empezar! 🚀
-      </button>
-    </div>
-  </div>
-
-  <!-- JAVASCRIPT DE LÓGICA Y PROPORCIONES -->
+  <!-- LÓGICA JAVASCRIPT -->
   <script>
-    // TABLAS DE MEDIDAS REALES (ANCHO x LARGO en cm)
+    // MEDIDAS FÍSICAS REALES (Ancho x Largo en cm)
     const SIZE_TABLES = {
       nino: {
         'Talla 2': [27, 38],
@@ -312,11 +293,40 @@
       }
     };
 
+    let currentStep = 1;
     let selectedGrade = "";
     let selectedMascotUrl = "";
-    let currentView = "front";
 
-    // Inicializar selectores
+    function changeStep(delta) {
+      if (delta === 1 && currentStep === 1) {
+        const name = document.getElementById('studentName').value.trim();
+        if (!name) { alert("Por favor escribe tu Nombre y Apellido."); return; }
+        if (!selectedGrade) { alert("Por favor haz clic sobre la mascota de tu grado."); return; }
+      }
+
+      currentStep += delta;
+      if (currentStep < 1) currentStep = 1;
+      if (currentStep > 4) currentStep = 4;
+
+      document.querySelectorAll('.wizard-step').forEach((el, index) => {
+        el.classList.toggle('active', index + 1 === currentStep);
+      });
+
+      document.getElementById('stepIndicator').textContent = `Paso ${currentStep} de 4`;
+      document.getElementById('prevBtn').classList.toggle('hidden', currentStep === 1);
+      document.getElementById('nextBtn').classList.toggle('hidden', currentStep === 4);
+      document.getElementById('finishBtn').classList.toggle('hidden', currentStep !== 4);
+
+      if (currentStep === 4) recalculateViewport();
+    }
+
+    function selectGrade(grade, mascotUrl) {
+      selectedGrade = grade;
+      selectedMascotUrl = mascotUrl;
+      document.querySelectorAll('.grade-card').forEach(el => el.classList.remove('border-brandYellow', 'bg-yellow-50', 'border-4'));
+      event.currentTarget.classList.add('border-brandYellow', 'bg-yellow-50', 'border-4');
+    }
+
     function updateSizes() {
       const cat = document.getElementById('categorySelect').value;
       const sizeSelect = document.getElementById('sizeSelect');
@@ -327,48 +337,120 @@
         opt.textContent = size;
         sizeSelect.appendChild(opt);
       });
+
+      // Actualizar imagen real de camiseta desde la carpeta de GitHub
+      const shirtImg = document.getElementById('shirtImage');
+      if (cat === 'nino') shirtImg.src = 'assets/img/Franelas/infantil.jpg';
+      else if (cat === 'dama') shirtImg.src = 'assets/img/Franelas/dama.jpg';
+      else if (cat === 'caballero') shirtImg.src = 'assets/img/Franelas/caballero.jpg';
+
       recalculateViewport();
     }
 
     function recalculateViewport() {
       const cat = document.getElementById('categorySelect').value;
       const size = document.getElementById('sizeSelect').value;
+      if (!size) return;
+
       const [wCm, hCm] = SIZE_TABLES[cat][size];
+      document.getElementById('sizeDimensionsLabel').textContent = `Medidas Reales: Ancho ${wCm} cm × Largo ${hCm} cm`;
 
-      document.getElementById('sizeDimensionsLabel').textContent = `Medidas reales: Ancho ${wCm} cm × Largo ${hCm} cm`;
-
-      // Relación proporcional
       const viewport = document.getElementById('shirtViewport');
-      const maxHeight = 480; 
-      const pxPerCm = maxHeight / hCm; 
+      const maxHeight = 440;
+      const pxPerCm = maxHeight / hCm;
       const widthPx = wCm * pxPerCm;
 
       viewport.style.width = `${widthPx}px`;
       viewport.style.height = `${maxHeight}px`;
     }
 
-    function selectGrade(grade, mascotUrl) {
-      selectedGrade = grade;
-      selectedMascotUrl = mascotUrl;
-      document.querySelectorAll('.grade-card').forEach(el => el.classList.remove('border-brandYellow', 'bg-yellow-50'));
-      event.currentTarget.classList.add('border-brandYellow', 'bg-yellow-50');
-      document.getElementById('selectedGradeBadge').classList.remove('hidden');
-      document.getElementById('gradeNameText').textContent = grade;
+    // REMOCIÓN DE FONDO BLANCO POR PÍXEL (CANVAS REAL)
+    function processImageBackground(file, callback) {
+      const removeBg = document.getElementById('removeBgCheck').checked;
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        if (!removeBg) { callback(e.target.result); return; }
+
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('canvas');
+          ctx.drawImage(img, 0, 0);
+
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imgData.data;
+
+          // Convertir tonos blancos/claros en transparencia
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i], g = data[i+1], b = data[i+2];
+            if (r > 200 && g > 200 && b > 200) {
+              data[i + 3] = 0; // Transparente
+            }
+          }
+          ctx.putImageData(imgData, 0, 0);
+          callback(canvas.toDataURL('image/png'));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
     }
 
-    function setView(view) {
-      currentView = view;
-      document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.classList.remove('bg-brandBlue', 'text-white');
-        btn.classList.add('bg-slate-200', 'text-slate-700');
+    // CARGAR ELEMENTOS AL CANVAS
+    document.getElementById('signatureInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        processImageBackground(file, (cleanSrc) => addImageToCanvas(cleanSrc, 20, 10));
+      }
+    });
+
+    document.getElementById('drawingsInput').addEventListener('change', function(e) {
+      const files = Array.from(e.target.files);
+      const combo = document.getElementById('comboSelect').value;
+
+      let sizes = [];
+      if (combo === 'A') sizes = [[15, 15], [10, 10], [5, 5]];
+      else if (combo === 'B') sizes = [[10, 10], [10, 10], [10, 10]];
+      else if (combo === 'C') sizes = [[5, 5], [5, 5], [5, 5], [5, 5], [5, 5], [5, 5]];
+
+      files.forEach((file, idx) => {
+        const [w, h] = sizes[idx % sizes.length];
+        processImageBackground(file, (cleanSrc) => addImageToCanvas(cleanSrc, w, h));
       });
-      event.currentTarget.classList.remove('bg-slate-200', 'text-slate-700');
-      event.currentTarget.classList.add('bg-brandBlue', 'text-white');
+    });
+
+    function addImageToCanvas(src, wCm, hCm) {
+      const cat = document.getElementById('categorySelect').value;
+      const size = document.getElementById('sizeSelect').value;
+      const [shirtWCm, shirtHCm] = SIZE_TABLES[cat][size];
+      const viewportHeight = 440;
+      const pxPerCm = viewportHeight / shirtHCm;
+
+      const item = document.createElement('div');
+      item.className = 'draggable-item';
+      item.style.width = `${wCm * pxPerCm}px`;
+      item.style.height = `${hCm * pxPerCm}px`;
+      item.style.left = `30px`;
+      item.style.top = `30px`;
+
+      const img = document.createElement('img');
+      img.src = src;
+
+      const del = document.createElement('div');
+      del.className = 'delete-btn';
+      del.textContent = '✕';
+      del.onclick = (e) => { e.stopPropagation(); item.remove(); };
+
+      item.appendChild(img);
+      item.appendChild(del);
+      document.getElementById('canvasItems').appendChild(item);
+      makeDraggable(item);
     }
 
-    // Lógica Drag & Drop
-    let activeItem = null;
-    let offset = { x: 0, y: 0 };
+    // ARRASTRE LIBRE (DRAG & DROP)
+    let activeItem = null, offset = { x: 0, y: 0 };
 
     function makeDraggable(el) {
       el.addEventListener('mousedown', startDrag);
@@ -409,88 +491,33 @@
       document.removeEventListener('touchmove', drag);
     }
 
-    // Cargar Imágenes
-    document.getElementById('signatureInput').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) addImageToCanvas(file, 20, 10, "Firma");
-    });
-
-    document.getElementById('drawingsInput').addEventListener('change', function(e) {
-      const files = Array.from(e.target.files);
-      const combo = document.getElementById('comboSelect').value;
-      
-      let sizes = [];
-      if (combo === 'A') sizes = [[15, 15], [10, 10], [5, 5]];
-      else if (combo === 'B') sizes = [[10, 10], [10, 10], [10, 10]];
-      else if (combo === 'C') sizes = [[5, 5], [5, 5], [5, 5], [5, 5], [5, 5], [5, 5]];
-
-      files.forEach((file, index) => {
-        const [w, h] = sizes[index % sizes.length];
-        addImageToCanvas(file, w, h, `Dibujo ${index + 1}`);
-      });
-    });
-
-    function addImageToCanvas(file, wCm, hCm, label) {
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        const cat = document.getElementById('categorySelect').value;
-        const size = document.getElementById('sizeSelect').value;
-        const [shirtWCm, shirtHCm] = SIZE_TABLES[cat][size];
-        const viewportHeight = 480;
-        const pxPerCm = viewportHeight / shirtHCm;
-
-        const item = document.createElement('div');
-        item.className = 'draggable-item';
-        item.style.width = `${wCm * pxPerCm}px`;
-        item.style.height = `${hCm * pxPerCm}px`;
-        item.style.left = `20px`;
-        item.style.top = `20px`;
-
-        const img = document.createElement('img');
-        img.src = event.target.result;
-
-        const del = document.createElement('div');
-        del.className = 'delete-btn';
-        del.textContent = '✕';
-        del.onclick = (e) => { e.stopPropagation(); item.remove(); };
-
-        item.appendChild(img);
-        item.appendChild(del);
-        document.getElementById('canvasItems').appendChild(item);
-        makeDraggable(item);
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // Modales
-    function openTutorial() { document.getElementById('tutorialModal').classList.remove('hidden'); }
-    function closeTutorial() { document.getElementById('tutorialModal').classList.add('hidden'); }
-
-    // Generar y Descargar Imagen
+    // GENERAR Y DESCARGAR IMAGEN FINAL EN PNG
     function generateFinalDesign() {
-      const studentName = document.getElementById('studentName').value.trim() || "Estudiante";
-      if (!selectedGrade) {
-        alert("Por favor selecciona tu grado haciéndole clic a tu mascota.");
-        return;
-      }
+      const name = document.getElementById('studentName').value.trim() || "Estudiante";
+      
+      // Ocultar botones de eliminar antes de capturar
+      document.querySelectorAll('.delete-btn').forEach(btn => btn.style.display = 'none');
 
-      html2canvas(document.getElementById('shirtViewport')).then(canvas => {
+      html2canvas(document.getElementById('shirtViewport'), { scale: 2 }).then(canvas => {
+        // Restaurar botones
+        document.querySelectorAll('.delete-btn').forEach(btn => btn.style.display = 'flex');
+
         const link = document.createElement('a');
-        const cleanName = studentName.replace(/\s+/g, '_');
+        const cleanName = name.replace(/\s+/g, '_');
         const cleanGrade = selectedGrade.replace(/\s+/g, '');
         link.download = `${cleanName}_${cleanGrade}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
 
-        // Abrir pestaña para tarjeta
+        // Abrir Pestaña de Tarjeta
         const win = window.open("", "_blank");
         win.document.write(`
           <html>
-            <head><title>Tarjeta - ${studentName}</title></head>
+            <head><title>Tarjeta - ${name}</title></head>
             <body style="font-family: sans-serif; text-align: center; padding: 40px; background: #0047AB; color: white;">
-              <h1>¡Felicitaciones ${studentName}! 🎓✨</h1>
-              <p>Tu diseño para el Abrazo en Familia de ${selectedGrade} se ha guardado exitosamente.</p>
-              <img src="${selectedMascotUrl}" style="max-height: 200px; background: white; padding: 10px; border-radius: 20px; margin-top: 20px;">
+              <h1>¡Felicitaciones ${name}! 🎓✨</h1>
+              <p style="font-size: 20px;">Tu diseño de ${selectedGrade} para el Abrazo en Familia se guardó con éxito.</p>
+              <img src="${selectedMascotUrl}" style="max-height: 250px; background: white; padding: 15px; border-radius: 20px; margin-top: 20px;">
             </body>
           </html>
         `);
